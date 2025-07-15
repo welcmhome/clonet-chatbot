@@ -192,10 +192,10 @@ export default function FloatingChatbot() {
           <button
             type="submit"
             disabled={!inputValue.trim() || isSending}
-            className={`ml-4 w-12 h-12 flex items-center justify-center rounded-full transition-all duration-200
-              ${!inputValue.trim() || isSending 
-                ? 'bg-white/20 cursor-not-allowed' 
-                : 'bg-white hover:bg-gray-200 cursor-pointer'
+            className={`ml-4 w-12 h-12 flex items-center justify-center rounded-full transition-colors duration-200
+              ${!inputValue.trim() || isSending
+                ? 'bg-white/20 cursor-default'
+                : 'bg-white hover:bg-neutral-200 cursor-pointer'
               }
             `}
             aria-label="Send"
