@@ -45,7 +45,8 @@ export default function FloatingChatbot() {
       setInputValue('')
     } catch (error) {
       console.error('Chat error:', error)
-      setLastResponse('Sorry, I encountered an error. Please try again.')
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
+      setLastResponse(`Error: ${errorMessage}`)
     } finally {
       setIsSending(false)
       inputRef.current?.focus()
