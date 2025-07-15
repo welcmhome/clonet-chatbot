@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     console.log('API key length:', OPENROUTER_API_KEY?.length || 0)
 
     const requestBody = {
-      model: 'deepseek/deepseek-chat',
+      model: 'deepseek/deepseek-chat:free',
       messages: [
         { role: 'user', content: message }
       ],
