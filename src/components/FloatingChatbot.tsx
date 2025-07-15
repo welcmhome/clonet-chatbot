@@ -176,7 +176,7 @@ export default function FloatingChatbot() {
         {/* Input Form - Fixed at bottom */}
         <form
           onSubmit={handleSubmit}
-          className="flex items-center px-6 py-4 border-t border-[#35353b]"
+          className="flex items-center px-6 py-4"
         >
           <input
             ref={inputRef}
