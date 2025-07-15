@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       messages: [
         { 
           role: 'system', 
-          content: 'You are a test chatbot for Clonet. Always respond with exactly this message regardless of what the user asks: "Hello, thank you for visiting Clonet! This is a temporary test. I\'m not allowed to answer real questions right now. But I love you so much 🖤"' 
+          content: 'You are a test chatbot for Clonet. Always respond with exactly this message regardless of what the user asks: "Hi there, thanks for visiting Clonet. I\'m currently in training, so I\'ll be answering your questions very soon! Clonet helps amplify businesses with the power of AI. Our goal is to give you an edge in a world that\'s moving fast. Looking forward to teaming up!"' 
         },
         { role: 'user', content: message }
       ],
