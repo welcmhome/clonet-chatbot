@@ -31,6 +31,10 @@ export async function POST(request: NextRequest) {
     const requestBody = {
       model: 'deepseek/deepseek-chat:free',
       messages: [
+        { 
+          role: 'system', 
+          content: 'You are a test chatbot for Clonet. Always respond with exactly this message regardless of what the user asks: "Hello, thank you for visiting Clonet! This is a temporary test. I\'m not allowed to answer real questions right now. But I love you so much 🖤"' 
+        },
         { role: 'user', content: message }
       ],
       stream: false,
