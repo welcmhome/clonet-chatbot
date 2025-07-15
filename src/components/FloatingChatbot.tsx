@@ -13,14 +13,20 @@ export default function FloatingChatbot() {
   const [isSending, setIsSending] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const messagesContainerRef = useRef<HTMLDivElement>(null)
 
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight
+    }
   }
 
+  // Only scroll when messages change and there are messages
   useEffect(() => {
-    scrollToBottom()
+    if (messages.length > 0) {
+      // Small delay to ensure DOM is updated
+      setTimeout(scrollToBottom, 100)
+    }
   }, [messages])
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -115,6 +121,7 @@ export default function FloatingChatbot() {
       >
         {/* Messages Area */}
         <div 
+          ref={messagesContainerRef}
           className="flex-1 overflow-y-auto px-6 py-4"
           style={{
             scrollbarWidth: 'thin',
@@ -163,7 +170,6 @@ export default function FloatingChatbot() {
                 </div>
               </div>
             )}
-            <div ref={messagesEndRef} />
           </div>
         </div>
 
