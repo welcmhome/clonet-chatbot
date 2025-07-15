@@ -192,7 +192,7 @@ export default function FloatingChatbot() {
           <button
             type="submit"
             disabled={!inputValue.trim() || isSending}
-            className={`ml-4 mb-1 w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-200
+            className={`ml-6 mb-2 w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-200
               ${!inputValue.trim() || isSending
                 ? 'bg-white/20 cursor-default'
                 : 'bg-white hover:bg-neutral-200 cursor-pointer'
