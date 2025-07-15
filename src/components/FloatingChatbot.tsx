@@ -39,7 +39,7 @@ export default function FloatingChatbot() {
     >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[750px] mx-2 md:mx-0 flex items-center px-10 py-6 rounded-3xl border border-[#35353b] shadow-2xl"
+        className="w-full max-w-[800px] mx-2 md:mx-0 flex items-center px-10 py-7 rounded-3xl border border-[#35353b] shadow-2xl"
         style={{
           background: 'rgba(24,24,28,0.92)',
           backdropFilter: 'blur(24px)',
@@ -54,7 +54,7 @@ export default function FloatingChatbot() {
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           placeholder="What do you want to know about Clonet?"
-          className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-xl px-0 py-0 h-14 md:h-16"
+          className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-xl px-0 py-0 h-[60px] md:h-[68px]"
           disabled={isSending || sent}
           autoFocus
           style={{ minWidth: 0 }}
