@@ -112,31 +112,50 @@ export default function FloatingChatbot() {
             maxHeight: '60vh',
           }}
         >
-          <div className="flex-1 overflow-y-auto px-6 py-4 max-h-[50vh]">
-            <div className="space-y-4">
+          <div 
+            className="flex-1 overflow-y-auto px-6 py-4 max-h-[50vh]"
+            style={{
+              scrollbarWidth: 'thin',
+              scrollbarColor: '#35353b transparent',
+            }}
+          >
+            <style jsx>{`
+              .chat-container::-webkit-scrollbar {
+                width: 6px;
+              }
+              .chat-container::-webkit-scrollbar-track {
+                background: transparent;
+              }
+              .chat-container::-webkit-scrollbar-thumb {
+                background: #35353b;
+                border-radius: 3px;
+              }
+              .chat-container::-webkit-scrollbar-thumb:hover {
+                background: #45454b;
+              }
+            `}</style>
+            <div className="space-y-4 chat-container">
               {messages.map((message) => (
                 <div
                   key={message.id}
                   className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                      message.role === 'user'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-[#35353b] text-white'
+                    className={`max-w-[80%] text-sm leading-relaxed ${
+                      message.role === 'user' ? 'text-blue-400' : 'text-white'
                     }`}
                   >
-                    <p className="text-sm">{message.content}</p>
+                    <p className="whitespace-pre-wrap">{message.content}</p>
                   </div>
                 </div>
               ))}
               {isSending && (
                 <div className="flex justify-start">
-                  <div className="bg-[#35353b] text-white rounded-2xl px-4 py-3">
-                    <div className="flex items-center space-x-2">
-                      <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
-                      <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                      <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                  <div className="text-white text-sm">
+                    <div className="flex items-center space-x-1">
+                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
+                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
                     </div>
                   </div>
                 </div>
