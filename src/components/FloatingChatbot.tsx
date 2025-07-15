@@ -193,19 +193,21 @@ export default function FloatingChatbot() {
             type="submit"
             disabled={!inputValue.trim() || isSending}
             className={`ml-4 w-12 h-12 flex items-center justify-center rounded-full transition-all duration-200
-              ${inputValue.trim() && !isSending ? 'bg-gradient-to-br from-[#35353b] to-[#23232b] hover:from-blue-700 hover:to-purple-700 shadow-lg' : 'bg-[#23232b]'}
-              ${isSending ? 'opacity-60 cursor-not-allowed' : ''}
+              ${!inputValue.trim() || isSending 
+                ? 'bg-white/20 cursor-not-allowed' 
+                : 'bg-white hover:bg-gray-200 cursor-pointer'
+              }
             `}
             aria-label="Send"
             style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
           >
             {isSending ? (
-              <svg className="w-5 h-5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" style={{ color: '#1A1A1A' }}>
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
               </svg>
             ) : (
-              <svg className="w-6 h-6 text-gray-500 hover:text-white transition-colors duration-200" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" style={{ color: '#1A1A1A' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 19V5M12 5l6 6M12 5l-6 6" />
               </svg>
             )}
