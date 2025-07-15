@@ -184,7 +184,7 @@ export default function FloatingChatbot() {
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
             placeholder="What do you want to know about Clonet?"
-            className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-sm px-0 py-0 h-[48px]"
+            className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-base px-0 py-0 h-[48px]"
             disabled={isSending}
             autoFocus
             style={{ minWidth: 0 }}
@@ -192,7 +192,7 @@ export default function FloatingChatbot() {
           <button
             type="submit"
             disabled={!inputValue.trim() || isSending}
-            className={`ml-3 w-7 h-7 flex items-center justify-center rounded-full transition-colors duration-200
+            className={`ml-4 mb-1 w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-200
               ${!inputValue.trim() || isSending
                 ? 'bg-white/20 cursor-default'
                 : 'bg-white hover:bg-neutral-200 cursor-pointer'
@@ -202,12 +202,12 @@ export default function FloatingChatbot() {
             style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
           >
             {isSending ? (
-              <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24" style={{ color: '#1A1A1A' }}>
+              <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" style={{ color: '#1A1A1A' }}>
                 <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                 <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
               </svg>
             ) : (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" style={{ color: '#1A1A1A' }}>
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" style={{ color: '#1A1A1A' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 19V5M12 5l6 6M12 5l-6 6" />
               </svg>
             )}
