@@ -39,7 +39,7 @@ export default function FloatingChatbot() {
     >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[700px] mx-2 md:mx-0 flex items-center px-10 py-7 rounded-3xl border border-[#35353b] shadow-2xl"
+        className="w-full max-w-[750px] mx-2 md:mx-0 flex items-center px-10 py-7 rounded-3xl border border-[#35353b] shadow-2xl"
         style={{
           background: 'rgba(24,24,28,0.92)',
           backdropFilter: 'blur(24px)',
