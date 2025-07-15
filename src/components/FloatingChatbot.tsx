@@ -1,18 +1,40 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
+
+interface Message {
+  id: string
+  role: 'user' | 'assistant'
+  content: string
+}
 
 export default function FloatingChatbot() {
   const [inputValue, setInputValue] = useState('')
   const [isSending, setIsSending] = useState(false)
-  const [lastResponse, setLastResponse] = useState('')
+  const [messages, setMessages] = useState<Message[]>([])
   const inputRef = useRef<HTMLInputElement>(null)
+  const messagesEndRef = useRef<HTMLDivElement>(null)
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
+  }
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputValue.trim() || isSending) return
 
-    console.log('Sending message:', inputValue.trim())
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      role: 'user',
+      content: inputValue.trim(),
+    }
+
+    setMessages(prev => [...prev, userMessage])
+    setInputValue('')
     setIsSending(true)
 
     try {
@@ -22,7 +44,7 @@ export default function FloatingChatbot() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          message: inputValue.trim(),
+          message: userMessage.content,
         }),
       })
 
@@ -41,12 +63,22 @@ export default function FloatingChatbot() {
         throw new Error(data.error)
       }
 
-      setLastResponse(data.response)
-      setInputValue('')
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.response,
+      }
+
+      setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error('Chat error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
-      setLastResponse(`Error: ${errorMessage}`)
+      const errorMsg: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: `Error: ${errorMessage}`,
+      }
+      setMessages(prev => [...prev, errorMsg])
     } finally {
       setIsSending(false)
       inputRef.current?.focus()
@@ -68,18 +100,50 @@ export default function FloatingChatbot() {
         gap: '16px',
       }}
     >
-      {/* Response Display */}
-      {lastResponse && (
+      {/* Chat Container */}
+      {messages.length > 0 && (
         <div
-          className="w-full max-w-[750px] mx-2 md:mx-0 rounded-3xl border border-[#35353b] shadow-2xl p-6"
+          className="w-full max-w-[750px] mx-2 md:mx-0 rounded-3xl border border-[#35353b] shadow-2xl overflow-hidden"
           style={{
             background: 'rgba(24,24,28,0.92)',
             backdropFilter: 'blur(24px)',
             WebkitBackdropFilter: 'blur(24px)',
             boxShadow: '0 12px 48px 0 rgba(0,0,0,0.55)',
+            maxHeight: '60vh',
           }}
         >
-          <p className="text-white text-lg">{lastResponse}</p>
+          <div className="flex-1 overflow-y-auto px-6 py-4 max-h-[50vh]">
+            <div className="space-y-4">
+              {messages.map((message) => (
+                <div
+                  key={message.id}
+                  className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                >
+                  <div
+                    className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+                      message.role === 'user'
+                        ? 'bg-blue-600 text-white'
+                        : 'bg-[#35353b] text-white'
+                    }`}
+                  >
+                    <p className="text-sm">{message.content}</p>
+                  </div>
+                </div>
+              ))}
+              {isSending && (
+                <div className="flex justify-start">
+                  <div className="bg-[#35353b] text-white rounded-2xl px-4 py-3">
+                    <div className="flex items-center space-x-2">
+                      <div className="w-2 h-2 bg-white rounded-full animate-bounce"></div>
+                      <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+                      <div className="w-2 h-2 bg-white rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+            <div ref={messagesEndRef} />
+          </div>
         </div>
       )}
 
