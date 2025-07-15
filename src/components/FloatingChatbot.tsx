@@ -176,7 +176,7 @@ export default function FloatingChatbot() {
         {/* Input Form - Fixed at bottom */}
         <form
           onSubmit={handleSubmit}
-          className="flex items-center px-6 py-4"
+          className="flex items-center px-6 py-4 relative"
         >
           <input
             ref={inputRef}
@@ -192,7 +192,7 @@ export default function FloatingChatbot() {
           <button
             type="submit"
             disabled={!inputValue.trim() || isSending}
-            className={`ml-10 mb-4 w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-200
+            className={`absolute bottom-3 right-3 w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-200
               ${!inputValue.trim() || isSending
                 ? 'bg-white/20 cursor-default'
                 : 'bg-white hover:bg-neutral-200 cursor-pointer'
