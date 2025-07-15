@@ -39,7 +39,7 @@ export default function FloatingChatbot() {
     >
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-[750px] mx-2 md:mx-0 relative px-10 py-7 rounded-3xl border border-[#35353b] shadow-2xl flex"
+        className="w-full max-w-[750px] mx-2 md:mx-0 flex items-center px-10 py-7 rounded-3xl border border-[#35353b] shadow-2xl"
         style={{
           background: 'rgba(24,24,28,0.92)',
           backdropFilter: 'blur(24px)',
@@ -54,15 +54,15 @@ export default function FloatingChatbot() {
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
           placeholder="What do you want to know about Clonet?"
-          className="absolute top-5 left-7 w-[calc(100%-80px)] bg-transparent outline-none text-white placeholder-gray-400 text-base md:text-lg font-normal md:font-medium px-0 py-0 h-auto"
-          style={{ minWidth: 0 }}
+          className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-xl px-0 py-0 h-[60px] md:h-[68px]"
           disabled={isSending || sent}
           autoFocus
+          style={{ minWidth: 0 }}
         />
         <button
           type="submit"
           disabled={!inputValue.trim() || isSending || sent}
-          className={`absolute bottom-5 right-7 w-12 h-12 flex items-center justify-center rounded-full transition-all duration-200
+          className={`ml-4 w-14 h-14 flex items-center justify-center rounded-full transition-all duration-200
             ${inputValue.trim() && !isSending && !sent ? 'bg-gradient-to-br from-[#35353b] to-[#23232b] hover:from-blue-700 hover:to-purple-700 shadow-lg' : 'bg-[#23232b]'}
             ${isSending || sent ? 'opacity-60 cursor-not-allowed' : ''}
           `}
