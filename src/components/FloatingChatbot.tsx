@@ -107,11 +107,6 @@ export default function FloatingChatbot() {
         gap: '16px',
       }}
     >
-      <style jsx>{`
-        .chatbot-overlay {
-          z-index: 2147483647 !important;
-        }
-      `}</style>
       {/* Single Chat Container */}
       <div
         className="w-full max-w-[750px] mx-2 md:mx-0 rounded-3xl border border-[#35353b] shadow-2xl overflow-hidden"
@@ -128,25 +123,25 @@ export default function FloatingChatbot() {
         {/* Messages Area */}
         <div 
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto px-6 py-4"
+          className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar"
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: '#35353b transparent',
             maxHeight: 'calc(50vh - 120px)',
           }}
         >
-          <style jsx>{`
-            .chat-container::-webkit-scrollbar {
+          <style jsx global>{`
+            .custom-scrollbar::-webkit-scrollbar {
               width: 6px;
             }
-            .chat-container::-webkit-scrollbar-track {
+            .custom-scrollbar::-webkit-scrollbar-track {
               background: transparent;
             }
-            .chat-container::-webkit-scrollbar-thumb {
+            .custom-scrollbar::-webkit-scrollbar-thumb {
               background: #35353b;
               border-radius: 3px;
             }
-            .chat-container::-webkit-scrollbar-thumb:hover {
+            .custom-scrollbar::-webkit-scrollbar-thumb:hover {
               background: #45454b;
             }
           `}</style>
