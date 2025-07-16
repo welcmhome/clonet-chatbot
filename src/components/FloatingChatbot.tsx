@@ -93,11 +93,12 @@ export default function FloatingChatbot() {
 
   return (
     <div
+      className="chatbot-overlay"
       style={{
         position: 'fixed',
         left: '50%',
         bottom: 48,
-        zIndex: 999999999,
+        zIndex: 2147483647,
         transform: 'translateX(-50%)',
         width: '100%',
         display: 'flex',
@@ -106,6 +107,11 @@ export default function FloatingChatbot() {
         gap: '16px',
       }}
     >
+      <style jsx>{`
+        .chatbot-overlay {
+          z-index: 2147483647 !important;
+        }
+      `}</style>
       {/* Single Chat Container */}
       <div
         className="w-full max-w-[750px] mx-2 md:mx-0 rounded-3xl border border-[#35353b] shadow-2xl overflow-hidden"
@@ -113,7 +119,8 @@ export default function FloatingChatbot() {
           position: 'relative',
           background: 'rgba(24,24,28,1)',
           boxShadow: '0 12px 48px 0 rgba(0,0,0,0.55)',
-          maxHeight: '70vh',
+          maxHeight: '50vh',
+          minHeight: '120px',
           display: 'flex',
           flexDirection: 'column',
         }}
@@ -125,7 +132,7 @@ export default function FloatingChatbot() {
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: '#35353b transparent',
-            maxHeight: 'calc(70vh - 120px)',
+            maxHeight: 'calc(50vh - 120px)',
           }}
         >
           <style jsx>{`
