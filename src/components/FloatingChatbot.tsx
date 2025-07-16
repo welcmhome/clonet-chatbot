@@ -97,7 +97,7 @@ export default function FloatingChatbot() {
         position: 'fixed',
         left: '50%',
         bottom: 48,
-        zIndex: 99999,
+        zIndex: 999999999,
         transform: 'translateX(-50%)',
         width: '100%',
         display: 'flex',
@@ -110,6 +110,7 @@ export default function FloatingChatbot() {
       <div
         className="w-full max-w-[750px] mx-2 md:mx-0 rounded-3xl border border-[#35353b] shadow-2xl overflow-hidden"
         style={{
+          position: 'relative',
           background: 'rgba(24,24,28,1)',
           boxShadow: '0 12px 48px 0 rgba(0,0,0,0.55)',
           maxHeight: '70vh',
