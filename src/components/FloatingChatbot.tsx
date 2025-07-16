@@ -97,7 +97,7 @@ export default function FloatingChatbot() {
         position: 'fixed',
         left: '50%',
         bottom: 48,
-        zIndex: 9999,
+        zIndex: 99999,
         transform: 'translateX(-50%)',
         width: '100%',
         display: 'flex',
