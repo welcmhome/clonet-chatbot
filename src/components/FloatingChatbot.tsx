@@ -184,7 +184,7 @@ export default function FloatingChatbot() {
             type="text"
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
-            placeholder="What do you want to know about Clonet?"
+            placeholder="Got a question? Ask Dot!"
             className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-base px-0 py-0 h-[48px]"
             disabled={isSending}
             autoFocus
