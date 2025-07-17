@@ -120,10 +120,20 @@ export default function FloatingChatbot() {
           flexDirection: 'column',
         }}
       >
+        <style jsx global>{`
+          @media (max-width: 768px) {
+            .mobile-chat-container {
+              max-height: 70vh !important;
+            }
+            .mobile-chat-container .messages-area {
+              max-height: calc(70vh - 120px) !important;
+            }
+          }
+        `}</style>
         {/* Messages Area */}
         <div 
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar"
+          className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar mobile-chat-container messages-area"
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: '#35353b transparent',
