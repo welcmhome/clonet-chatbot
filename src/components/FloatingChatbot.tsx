@@ -120,20 +120,10 @@ export default function FloatingChatbot() {
           flexDirection: 'column',
         }}
       >
-        <style jsx global>{`
-          @media (max-width: 768px) {
-            .mobile-chat-container {
-              max-height: 70vh !important;
-            }
-            .mobile-chat-container .messages-area {
-              max-height: calc(70vh - 120px) !important;
-            }
-          }
-        `}</style>
         {/* Messages Area */}
         <div 
           ref={messagesContainerRef}
-          className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar mobile-chat-container messages-area"
+          className="flex-1 overflow-y-auto px-6 py-4 custom-scrollbar"
           style={{
             scrollbarWidth: 'thin',
             scrollbarColor: '#35353b transparent',
@@ -153,6 +143,11 @@ export default function FloatingChatbot() {
             }
             .custom-scrollbar::-webkit-scrollbar-thumb:hover {
               background: #45454b;
+            }
+            @media (max-width: 768px) {
+              .custom-scrollbar {
+                max-height: calc(70vh - 120px) !important;
+              }
             }
           `}</style>
           <div className="space-y-4 chat-container">
