@@ -21,6 +21,7 @@ export default function FloatingChatbot() {
   const [messages, setMessages] = useState<Message[]>([])
   const [leadData, setLeadData] = useState<LeadData>({})
   const [isCollectingLead, setIsCollectingLead] = useState(false)
+  const [isWaitingForConfirmation, setIsWaitingForConfirmation] = useState(false)
   const [leadStep, setLeadStep] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
@@ -46,6 +47,7 @@ export default function FloatingChatbot() {
       'how do i contact you',
       'can i speak to someone',
       'i need help with a project',
+      'i need help',
       'do you do',
       'i want to work with you',
       'can you help me with',
@@ -60,6 +62,31 @@ export default function FloatingChatbot() {
     return triggers.some(trigger => lowerMessage.includes(trigger))
   }
 
+  // Check if user agrees to submit form
+  const checkUserAgreement = (message: string): boolean => {
+    const affirmative = [
+      'yes',
+      'yeah',
+      'sure',
+      'okay',
+      'ok',
+      'yep',
+      'absolutely',
+      'definitely',
+      'of course',
+      'that sounds good',
+      'sounds good',
+      'let\'s do that',
+      'do that',
+      'submit',
+      'submit request',
+      'help me submit'
+    ]
+    
+    const lowerMessage = message.toLowerCase()
+    return affirmative.some(agree => lowerMessage.includes(agree))
+  }
+
   // Handle lead collection step
   const handleLeadStep = async (userInput: string) => {
     const currentStep = leadStep
@@ -67,23 +94,23 @@ export default function FloatingChatbot() {
     let response = ''
 
     switch (currentStep) {
-      case 0: // Name
+      case 0: // STAGE 1: Full name
         setLeadData(prev => ({ ...prev, name: userInput }))
-        response = "Great! What's your email address?"
+        response = "What's your email address?"
         break
-      case 1: // Email
+      case 1: // STAGE 2: Email
         setLeadData(prev => ({ ...prev, email: userInput }))
-        response = "Perfect. What's your phone number? (optional — you can skip this if you prefer)"
+        response = "What's your phone number? (optional — you can skip this if you prefer)"
         break
-      case 2: // Phone (optional)
+      case 2: // STAGE 3: Phone (optional)
         if (userInput.toLowerCase().includes('skip') || userInput.toLowerCase().includes('no') || userInput.trim() === '') {
-          response = "No problem! What do you need help with? Tell me about your project or what you're looking for."
+          response = "What do you need help with?"
         } else {
           setLeadData(prev => ({ ...prev, phone: userInput }))
-          response = "Got it! What do you need help with? Tell me about your project or what you're looking for."
+          response = "What do you need help with?"
         }
         break
-      case 3: // Message/Project description
+      case 3: // STAGE 4: Message/Project description
         const finalLeadData = { ...leadData, message: userInput }
         
         // Submit lead data
@@ -104,7 +131,7 @@ export default function FloatingChatbot() {
           }
 
           const submitData = await submitResponse.json()
-          response = submitData.response || "Thanks! I've sent your message to the team — someone will follow up with you soon."
+          response = submitData.response || "Thanks! I've sent your message to the team — someone will follow up with you shortly."
           
           // Reset lead collection state
           setIsCollectingLead(false)
@@ -149,16 +176,39 @@ export default function FloatingChatbot() {
           content: leadResponse,
         }
         setMessages(prev => [...prev, assistantMessage])
-      } else {
-        // Check if this message triggers lead collection
-        if (checkLeadTrigger(userInput)) {
+      } else if (isWaitingForConfirmation) {
+        // Check if user agrees to submit form
+        if (checkUserAgreement(userInput)) {
+          setIsWaitingForConfirmation(false)
           setIsCollectingLead(true)
           setLeadStep(0)
           
           const assistantMessage: Message = {
             id: (Date.now() + 1).toString(),
             role: 'assistant',
-            content: "You can email us directly at info@clonet.ai — or I can help you submit a request right here and pass it along to the team.",
+            content: "Great! Let's get your information. What's your full name?",
+          }
+          setMessages(prev => [...prev, assistantMessage])
+        } else {
+          // User declined, reset and continue normal chat
+          setIsWaitingForConfirmation(false)
+          
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: "No problem! Feel free to email us at info@clonet.ai anytime. How else can I help you?",
+          }
+          setMessages(prev => [...prev, assistantMessage])
+        }
+      } else {
+        // Check if this message triggers lead collection
+        if (checkLeadTrigger(userInput)) {
+          setIsWaitingForConfirmation(true)
+          
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: "You can email us at info@clonet.ai — or I can help you submit a request right here. Want to do that?",
           }
           setMessages(prev => [...prev, assistantMessage])
         } else {
@@ -310,7 +360,13 @@ export default function FloatingChatbot() {
           type="text"
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
-          placeholder={isCollectingLead ? "Type your response..." : "Got a Clonet question? Ask Dot!"}
+          placeholder={
+            isCollectingLead 
+              ? "Type your response..." 
+              : isWaitingForConfirmation 
+                ? "Yes or no..." 
+                : "Got a Clonet question? Ask Dot!"
+          }
           className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-base px-0 py-0 h-[48px]"
           disabled={isSending}
           autoFocus
