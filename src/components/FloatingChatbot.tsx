@@ -21,7 +21,6 @@ export default function FloatingChatbot() {
   const [messages, setMessages] = useState<Message[]>([])
   const [leadData, setLeadData] = useState<LeadData>({})
   const [isCollectingLead, setIsCollectingLead] = useState(false)
-  const [isWaitingForConfirmation, setIsWaitingForConfirmation] = useState(false)
   const [leadStep, setLeadStep] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
@@ -55,36 +54,29 @@ export default function FloatingChatbot() {
       'contact you',
       'get a quote',
       'speak to someone',
-      'work with you'
+      'work with you',
+      'can i get a quote',
+      'how do i talk to someone',
+      'i want to contact you'
     ]
     
     const lowerMessage = message.toLowerCase()
     return triggers.some(trigger => lowerMessage.includes(trigger))
   }
 
-  // Check if user agrees to submit form
-  const checkUserAgreement = (message: string): boolean => {
-    const affirmative = [
-      'yes',
-      'yeah',
-      'sure',
-      'okay',
-      'ok',
-      'yep',
-      'absolutely',
-      'definitely',
-      'of course',
-      'that sounds good',
-      'sounds good',
-      'let\'s do that',
-      'do that',
-      'submit',
-      'submit request',
-      'help me submit'
+  // Check if user wants to cancel
+  const checkUserCancel = (message: string): boolean => {
+    const cancelPhrases = [
+      'cancel',
+      'never mind',
+      'stop',
+      'no thanks',
+      'not now',
+      'maybe later'
     ]
     
     const lowerMessage = message.toLowerCase()
-    return affirmative.some(agree => lowerMessage.includes(agree))
+    return cancelPhrases.some(phrase => lowerMessage.includes(phrase))
   }
 
   // Handle lead collection step
@@ -96,18 +88,18 @@ export default function FloatingChatbot() {
     switch (currentStep) {
       case 0: // STAGE 1: Full name
         setLeadData(prev => ({ ...prev, name: userInput }))
-        response = "What's your email address?"
+        response = "What's the best email to reach you at?"
         break
       case 1: // STAGE 2: Email
         setLeadData(prev => ({ ...prev, email: userInput }))
-        response = "What's your phone number? (optional — you can skip this if you prefer)"
+        response = "What's your phone number? (optional)"
         break
       case 2: // STAGE 3: Phone (optional)
         if (userInput.toLowerCase().includes('skip') || userInput.toLowerCase().includes('no') || userInput.trim() === '') {
-          response = "What do you need help with?"
+          response = "Lastly, what would you like help with?"
         } else {
           setLeadData(prev => ({ ...prev, phone: userInput }))
-          response = "What do you need help with?"
+          response = "Lastly, what would you like help with?"
         }
         break
       case 3: // STAGE 4: Message/Project description
@@ -131,7 +123,7 @@ export default function FloatingChatbot() {
           }
 
           const submitData = await submitResponse.json()
-          response = submitData.response || "Thanks! I've sent your message to the team — someone will follow up with you shortly."
+          response = submitData.response || "Thanks, I've submitted your request to the team. We'll reach out shortly."
           
           // Reset lead collection state
           setIsCollectingLead(false)
@@ -169,29 +161,11 @@ export default function FloatingChatbot() {
     try {
       // Check if we're in lead collection mode
       if (isCollectingLead) {
-        const leadResponse = await handleLeadStep(userInput)
-        const assistantMessage: Message = {
-          id: (Date.now() + 1).toString(),
-          role: 'assistant',
-          content: leadResponse,
-        }
-        setMessages(prev => [...prev, assistantMessage])
-      } else if (isWaitingForConfirmation) {
-        // Check if user agrees to submit form
-        if (checkUserAgreement(userInput)) {
-          setIsWaitingForConfirmation(false)
-          setIsCollectingLead(true)
+        // Check if user wants to cancel
+        if (checkUserCancel(userInput)) {
+          setIsCollectingLead(false)
           setLeadStep(0)
-          
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: "Great! Let's get your information. What's your full name?",
-          }
-          setMessages(prev => [...prev, assistantMessage])
-        } else {
-          // User declined, reset and continue normal chat
-          setIsWaitingForConfirmation(false)
+          setLeadData({})
           
           const assistantMessage: Message = {
             id: (Date.now() + 1).toString(),
@@ -199,16 +173,25 @@ export default function FloatingChatbot() {
             content: "No problem! Feel free to email us at info@clonet.ai anytime. How else can I help you?",
           }
           setMessages(prev => [...prev, assistantMessage])
+        } else {
+          const leadResponse = await handleLeadStep(userInput)
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: leadResponse,
+          }
+          setMessages(prev => [...prev, assistantMessage])
         }
       } else {
         // Check if this message triggers lead collection
         if (checkLeadTrigger(userInput)) {
-          setIsWaitingForConfirmation(true)
+          setIsCollectingLead(true)
+          setLeadStep(0)
           
           const assistantMessage: Message = {
             id: (Date.now() + 1).toString(),
             role: 'assistant',
-            content: "You can email us at info@clonet.ai — or I can help you submit a request right here. Want to do that?",
+            content: "Sure, I can help with that. I'll just collect a few details and submit it to the team for you. Or, if you prefer, you can email us at info@clonet.ai. What's your full name?",
           }
           setMessages(prev => [...prev, assistantMessage])
         } else {
@@ -363,9 +346,7 @@ export default function FloatingChatbot() {
           placeholder={
             isCollectingLead 
               ? "Type your response..." 
-              : isWaitingForConfirmation 
-                ? "Yes or no..." 
-                : "Got a Clonet question? Ask Dot!"
+              : "Got a Clonet question? Ask Dot!"
           }
           className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-base px-0 py-0 h-[48px]"
           disabled={isSending}
