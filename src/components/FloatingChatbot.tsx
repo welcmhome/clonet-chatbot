@@ -87,7 +87,7 @@ export default function FloatingChatbot() {
       setMessages(prev => [...prev, errorMsg])
     } finally {
       setIsSending(false)
-      inputRef.current?.focus()
+        inputRef.current?.focus()
     }
   }
 
@@ -183,42 +183,42 @@ export default function FloatingChatbot() {
         <form
           onSubmit={handleSubmit}
           className="flex items-center px-6 py-4 relative"
-        >
-          <input
-            ref={inputRef}
-            type="text"
-            value={inputValue}
-            onChange={e => setInputValue(e.target.value)}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={e => setInputValue(e.target.value)}
             placeholder="Got a Clonet question? Ask Dot!"
             className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-base px-0 py-0 h-[48px]"
             disabled={isSending}
-            autoFocus
-            style={{ minWidth: 0 }}
-          />
-          <button
-            type="submit"
+          autoFocus
+          style={{ minWidth: 0 }}
+        />
+        <button
+          type="submit"
             disabled={!inputValue.trim() || isSending}
             className={`absolute bottom-3 right-3 w-9 h-9 flex items-center justify-center rounded-full transition-colors duration-200
               ${!inputValue.trim() || isSending
                 ? 'bg-white/20 cursor-default'
                 : 'bg-white hover:bg-neutral-200 cursor-pointer'
               }
-            `}
-            aria-label="Send"
-            style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
-          >
-            {isSending ? (
+          `}
+          aria-label="Send"
+          style={{ boxShadow: '0 2px 16px 0 rgba(0,0,0,0.18)' }}
+        >
+          {isSending ? (
               <svg className="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24" style={{ color: '#1A1A1A' }}>
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
-              </svg>
-            ) : (
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
+            </svg>
+          ) : (
               <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24" style={{ color: '#1A1A1A' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 19V5M12 5l6 6M12 5l-6 6" />
-              </svg>
-            )}
-          </button>
-        </form>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 19V5M12 5l6 6M12 5l-6 6" />
+            </svg>
+          )}
+        </button>
+      </form>
       </div>
     </div>
   )
