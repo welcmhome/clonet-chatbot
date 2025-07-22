@@ -8,10 +8,20 @@ interface Message {
   content: string
 }
 
+interface LeadData {
+  name?: string
+  email?: string
+  phone?: string
+  message?: string
+}
+
 export default function FloatingChatbot() {
   const [inputValue, setInputValue] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
+  const [leadData, setLeadData] = useState<LeadData>({})
+  const [isCollectingLead, setIsCollectingLead] = useState(false)
+  const [leadStep, setLeadStep] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
@@ -29,6 +39,91 @@ export default function FloatingChatbot() {
     }
   }, [messages])
 
+  // Check if message triggers lead collection
+  const checkLeadTrigger = (message: string): boolean => {
+    const triggers = [
+      'i want a quote',
+      'how do i contact you',
+      'can i speak to someone',
+      'i need help with a project',
+      'do you do',
+      'i want to work with you',
+      'can you help me with',
+      'i need a solution for',
+      'contact you',
+      'get a quote',
+      'speak to someone',
+      'work with you'
+    ]
+    
+    const lowerMessage = message.toLowerCase()
+    return triggers.some(trigger => lowerMessage.includes(trigger))
+  }
+
+  // Handle lead collection step
+  const handleLeadStep = async (userInput: string) => {
+    const currentStep = leadStep
+    let nextStep = currentStep + 1
+    let response = ''
+
+    switch (currentStep) {
+      case 0: // Name
+        setLeadData(prev => ({ ...prev, name: userInput }))
+        response = "Great! What's your email address?"
+        break
+      case 1: // Email
+        setLeadData(prev => ({ ...prev, email: userInput }))
+        response = "Perfect. What's your phone number? (optional — you can skip this if you prefer)"
+        break
+      case 2: // Phone (optional)
+        if (userInput.toLowerCase().includes('skip') || userInput.toLowerCase().includes('no') || userInput.trim() === '') {
+          response = "No problem! What do you need help with? Tell me about your project or what you're looking for."
+        } else {
+          setLeadData(prev => ({ ...prev, phone: userInput }))
+          response = "Got it! What do you need help with? Tell me about your project or what you're looking for."
+        }
+        break
+      case 3: // Message/Project description
+        const finalLeadData = { ...leadData, message: userInput }
+        
+        // Submit lead data
+        try {
+          const submitResponse = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: 'Submit lead',
+              leadData: finalLeadData
+            }),
+          })
+
+          if (!submitResponse.ok) {
+            throw new Error(`HTTP ${submitResponse.status}`)
+          }
+
+          const submitData = await submitResponse.json()
+          response = submitData.response || "Thanks! I've sent your message to the team — someone will follow up with you soon."
+          
+          // Reset lead collection state
+          setIsCollectingLead(false)
+          setLeadStep(0)
+          setLeadData({})
+        } catch (error) {
+          console.error('Lead submission error:', error)
+          response = "I had trouble submitting your request. You can email us directly at info@clonet.ai and we'll get back to you right away."
+          setIsCollectingLead(false)
+          setLeadStep(0)
+          setLeadData({})
+        }
+        break
+    }
+
+    setLeadStep(nextStep)
+    return response
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputValue.trim() || isSending) return
@@ -40,42 +135,68 @@ export default function FloatingChatbot() {
     }
 
     setMessages(prev => [...prev, userMessage])
+    const userInput = inputValue.trim()
     setInputValue('')
     setIsSending(true)
 
     try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: userMessage.content,
-        }),
-      })
+      // Check if we're in lead collection mode
+      if (isCollectingLead) {
+        const leadResponse = await handleLeadStep(userInput)
+        const assistantMessage: Message = {
+          id: (Date.now() + 1).toString(),
+          role: 'assistant',
+          content: leadResponse,
+        }
+        setMessages(prev => [...prev, assistantMessage])
+      } else {
+        // Check if this message triggers lead collection
+        if (checkLeadTrigger(userInput)) {
+          setIsCollectingLead(true)
+          setLeadStep(0)
+          
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: "You can email us directly at info@clonet.ai — or I can help you submit a request right here and pass it along to the team.",
+          }
+          setMessages(prev => [...prev, assistantMessage])
+        } else {
+          // Normal chat flow
+          const response = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              message: userMessage.content,
+            }),
+          })
 
-      console.log('Response status:', response.status)
+          console.log('Response status:', response.status)
 
-      if (!response.ok) {
-        const errorText = await response.text()
-        console.error('Response error:', errorText)
-        throw new Error(`HTTP ${response.status}: ${errorText}`)
+          if (!response.ok) {
+            const errorText = await response.text()
+            console.error('Response error:', errorText)
+            throw new Error(`HTTP ${response.status}: ${errorText}`)
+          }
+
+          const data = await response.json()
+          console.log('Response data:', data)
+
+          if (data.error) {
+            throw new Error(data.error)
+          }
+
+          const assistantMessage: Message = {
+            id: (Date.now() + 1).toString(),
+            role: 'assistant',
+            content: data.response,
+          }
+
+          setMessages(prev => [...prev, assistantMessage])
+        }
       }
-
-      const data = await response.json()
-      console.log('Response data:', data)
-
-      if (data.error) {
-        throw new Error(data.error)
-      }
-
-      const assistantMessage: Message = {
-        id: (Date.now() + 1).toString(),
-        role: 'assistant',
-        content: data.response,
-      }
-
-      setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error('Chat error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
@@ -87,7 +208,7 @@ export default function FloatingChatbot() {
       setMessages(prev => [...prev, errorMsg])
     } finally {
       setIsSending(false)
-        inputRef.current?.focus()
+      inputRef.current?.focus()
     }
   }
 
@@ -189,9 +310,9 @@ export default function FloatingChatbot() {
           type="text"
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
-            placeholder="Got a Clonet question? Ask Dot!"
-            className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-base px-0 py-0 h-[48px]"
-            disabled={isSending}
+          placeholder={isCollectingLead ? "Type your response..." : "Got a Clonet question? Ask Dot!"}
+          className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-base px-0 py-0 h-[48px]"
+          disabled={isSending}
           autoFocus
           style={{ minWidth: 0 }}
         />
