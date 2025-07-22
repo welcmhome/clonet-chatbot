@@ -14,46 +14,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { message, leadData } = await request.json()
+    const { message } = await request.json()
     console.log('Received message:', message)
-    console.log('Received lead data:', leadData)
-
-    // Handle lead submission if leadData is provided
-    if (leadData) {
-      console.log('Processing lead submission...')
-      try {
-        const leadResponse = await fetch(`${request.nextUrl.origin}/api/lead`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(leadData),
-        })
-
-        if (!leadResponse.ok) {
-          const errorData = await leadResponse.text()
-          console.error('Lead submission error:', errorData)
-          return NextResponse.json(
-            { error: `Lead submission failed: ${errorData}` },
-            { status: leadResponse.status }
-          )
-        }
-
-        const leadResult = await leadResponse.json()
-        console.log('Lead submission successful:', leadResult)
-        
-        return NextResponse.json({ 
-          response: "Thanks! I've sent your message to the team — someone will follow up with you soon.",
-          leadSubmitted: true 
-        })
-      } catch (error) {
-        console.error('Lead submission error:', error)
-        return NextResponse.json(
-          { error: `Lead submission failed: ${(error as Error)?.message || 'Unknown error'}` },
-          { status: 500 }
-        )
-      }
-    }
 
     if (!message) {
       console.log('No message provided')
@@ -85,38 +47,6 @@ CRITICAL FORMATTING RULES - STRICTLY ENFORCED:
   - AI call centers
 - Do not use **double asterisks**, \`backticks\`, or any characters meant for formatting.
 - DOT must never expose Markdown syntax or formatting characters.
-
-LEAD COLLECTION TRIGGERS:
-If the user says something like:
-- "I want a quote"
-- "How do I contact you?"
-- "Can I speak to someone?"
-- "I need help with a project"
-- "I need help"
-- "Do you do [something]?"
-- "I want to work with you"
-- "Can you help me with [project]?"
-- "I need a solution for [problem]"
-- "Can I get a quote?"
-- "How do I talk to someone?"
-- "I want to contact you"
-
-Then respond with:
-"Sure, I can help with that. I'll just collect a few details and submit it to the team for you. Or, if you prefer, you can email us at info@clonet.ai."
-
-Then begin this exact sequence, one step at a time:
-1. Ask: "What's your full name?"
-2. Wait for answer, then ask: "What's the best email to reach you at?"
-3. Wait for answer, then ask: "What's your phone number? (optional)"
-4. Wait for answer, then ask: "Lastly, what would you like help with?"
-5. Once all four are collected, submit them via POST request to the lead collection endpoint
-
-After submission, say:
-"Thanks, I've submitted your request to the team. We'll reach out shortly."
-
-If the user says "cancel" at any point, politely stop the flow and return to normal conversation.
-
-Do not ask all questions at once. Wait for answers between steps. Never break the flow. Never revert to generic fallback messages mid-process.
 
 WEBSITE RESPONSE:
 If a user asks something like "Do you build websites?" or "Can you make me a website?" — DOT should respond with:

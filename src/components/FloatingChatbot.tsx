@@ -8,20 +8,10 @@ interface Message {
   content: string
 }
 
-interface LeadData {
-  name?: string
-  email?: string
-  phone?: string
-  message?: string
-}
-
 export default function FloatingChatbot() {
   const [inputValue, setInputValue] = useState('')
   const [isSending, setIsSending] = useState(false)
   const [messages, setMessages] = useState<Message[]>([])
-  const [leadData, setLeadData] = useState<LeadData>({})
-  const [isCollectingLead, setIsCollectingLead] = useState(false)
-  const [leadStep, setLeadStep] = useState(0)
   const inputRef = useRef<HTMLInputElement>(null)
   const messagesContainerRef = useRef<HTMLDivElement>(null)
 
@@ -39,110 +29,6 @@ export default function FloatingChatbot() {
     }
   }, [messages])
 
-  // Check if message triggers lead collection
-  const checkLeadTrigger = (message: string): boolean => {
-    const triggers = [
-      'i want a quote',
-      'how do i contact you',
-      'can i speak to someone',
-      'i need help with a project',
-      'i need help',
-      'do you do',
-      'i want to work with you',
-      'can you help me with',
-      'i need a solution for',
-      'contact you',
-      'get a quote',
-      'speak to someone',
-      'work with you',
-      'can i get a quote',
-      'how do i talk to someone',
-      'i want to contact you'
-    ]
-    
-    const lowerMessage = message.toLowerCase()
-    return triggers.some(trigger => lowerMessage.includes(trigger))
-  }
-
-  // Check if user wants to cancel
-  const checkUserCancel = (message: string): boolean => {
-    const cancelPhrases = [
-      'cancel',
-      'never mind',
-      'stop',
-      'no thanks',
-      'not now',
-      'maybe later'
-    ]
-    
-    const lowerMessage = message.toLowerCase()
-    return cancelPhrases.some(phrase => lowerMessage.includes(phrase))
-  }
-
-  // Handle lead collection step
-  const handleLeadStep = async (userInput: string) => {
-    const currentStep = leadStep
-    let nextStep = currentStep + 1
-    let response = ''
-
-    switch (currentStep) {
-      case 0: // STAGE 1: Full name
-        setLeadData(prev => ({ ...prev, name: userInput }))
-        response = "What's the best email to reach you at?"
-        break
-      case 1: // STAGE 2: Email
-        setLeadData(prev => ({ ...prev, email: userInput }))
-        response = "What's your phone number? (optional)"
-        break
-      case 2: // STAGE 3: Phone (optional)
-        if (userInput.toLowerCase().includes('skip') || userInput.toLowerCase().includes('no') || userInput.trim() === '') {
-          response = "Lastly, what would you like help with?"
-        } else {
-          setLeadData(prev => ({ ...prev, phone: userInput }))
-          response = "Lastly, what would you like help with?"
-        }
-        break
-      case 3: // STAGE 4: Message/Project description
-        const finalLeadData = { ...leadData, message: userInput }
-        
-        // Submit lead data
-        try {
-          const submitResponse = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: 'Submit lead',
-              leadData: finalLeadData
-            }),
-          })
-
-          if (!submitResponse.ok) {
-            throw new Error(`HTTP ${submitResponse.status}`)
-          }
-
-          const submitData = await submitResponse.json()
-          response = submitData.response || "Thanks, I've submitted your request to the team. We'll reach out shortly."
-          
-          // Reset lead collection state
-          setIsCollectingLead(false)
-          setLeadStep(0)
-          setLeadData({})
-        } catch (error) {
-          console.error('Lead submission error:', error)
-          response = "I had trouble submitting your request. You can email us directly at info@clonet.ai and we'll get back to you right away."
-          setIsCollectingLead(false)
-          setLeadStep(0)
-          setLeadData({})
-        }
-        break
-    }
-
-    setLeadStep(nextStep)
-    return response
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputValue.trim() || isSending) return
@@ -154,82 +40,42 @@ export default function FloatingChatbot() {
     }
 
     setMessages(prev => [...prev, userMessage])
-    const userInput = inputValue.trim()
     setInputValue('')
     setIsSending(true)
 
     try {
-      // Check if we're in lead collection mode
-      if (isCollectingLead) {
-        // Check if user wants to cancel
-        if (checkUserCancel(userInput)) {
-          setIsCollectingLead(false)
-          setLeadStep(0)
-          setLeadData({})
-          
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: "No problem! Feel free to email us at info@clonet.ai anytime. How else can I help you?",
-          }
-          setMessages(prev => [...prev, assistantMessage])
-        } else {
-          const leadResponse = await handleLeadStep(userInput)
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: leadResponse,
-          }
-          setMessages(prev => [...prev, assistantMessage])
-        }
-      } else {
-        // Check if this message triggers lead collection
-        if (checkLeadTrigger(userInput)) {
-          setIsCollectingLead(true)
-          setLeadStep(0)
-          
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: "Sure, I can help with that. I'll just collect a few details and submit it to the team for you. Or, if you prefer, you can email us at info@clonet.ai. What's your full name?",
-          }
-          setMessages(prev => [...prev, assistantMessage])
-        } else {
-          // Normal chat flow
-          const response = await fetch('/api/chat', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: userMessage.content,
-            }),
-          })
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          message: userMessage.content,
+        }),
+      })
 
-          console.log('Response status:', response.status)
+      console.log('Response status:', response.status)
 
-          if (!response.ok) {
-            const errorText = await response.text()
-            console.error('Response error:', errorText)
-            throw new Error(`HTTP ${response.status}: ${errorText}`)
-          }
-
-          const data = await response.json()
-          console.log('Response data:', data)
-
-          if (data.error) {
-            throw new Error(data.error)
-          }
-
-          const assistantMessage: Message = {
-            id: (Date.now() + 1).toString(),
-            role: 'assistant',
-            content: data.response,
-          }
-
-          setMessages(prev => [...prev, assistantMessage])
-        }
+      if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Response error:', errorText)
+        throw new Error(`HTTP ${response.status}: ${errorText}`)
       }
+
+      const data = await response.json()
+      console.log('Response data:', data)
+
+      if (data.error) {
+        throw new Error(data.error)
+      }
+
+      const assistantMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        role: 'assistant',
+        content: data.response,
+      }
+
+      setMessages(prev => [...prev, assistantMessage])
     } catch (error) {
       console.error('Chat error:', error)
       const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred'
@@ -241,7 +87,7 @@ export default function FloatingChatbot() {
       setMessages(prev => [...prev, errorMsg])
     } finally {
       setIsSending(false)
-      inputRef.current?.focus()
+        inputRef.current?.focus()
     }
   }
 
@@ -343,13 +189,9 @@ export default function FloatingChatbot() {
           type="text"
           value={inputValue}
           onChange={e => setInputValue(e.target.value)}
-          placeholder={
-            isCollectingLead 
-              ? "Type your response..." 
-              : "Got a Clonet question? Ask Dot!"
-          }
-          className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-base px-0 py-0 h-[48px]"
-          disabled={isSending}
+            placeholder="Got a Clonet question? Ask Dot!"
+            className="flex-1 bg-transparent outline-none text-white placeholder-gray-400 text-base px-0 py-0 h-[48px]"
+            disabled={isSending}
           autoFocus
           style={{ minWidth: 0 }}
         />
