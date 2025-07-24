@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
     console.log('API key length:', OPENROUTER_API_KEY?.length || 0)
 
     const requestBody = {
-      model: 'openai/gpt-3.5-turbo',
+      model: 'deepseek/deepseek-r1-0528:free',
       messages: [
         { 
           role: 'system', 
