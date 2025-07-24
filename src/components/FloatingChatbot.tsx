@@ -29,6 +29,16 @@ export default function FloatingChatbot() {
     }
   }, [messages])
 
+  // Focus input field after assistant responds
+  useEffect(() => {
+    if (messages.length > 0 && messages[messages.length - 1].role === 'assistant' && !isSending) {
+      // Small delay to ensure DOM is updated and assistant message is rendered
+      setTimeout(() => {
+        inputRef.current?.focus()
+      }, 150)
+    }
+  }, [messages, isSending])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!inputValue.trim() || isSending) return
@@ -87,7 +97,10 @@ export default function FloatingChatbot() {
       setMessages(prev => [...prev, errorMsg])
     } finally {
       setIsSending(false)
+      // Small delay to ensure state updates are complete before focusing
+      setTimeout(() => {
         inputRef.current?.focus()
+      }, 50)
     }
   }
 
